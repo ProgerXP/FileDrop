@@ -1,0 +1,376 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <title>FileDrop JavaScript class demo</title>
+    <meta name="description" content="Cross-browser dependencies-free minimalistic JavaScript class for AJAX and Drag &amp; Drop file upload." />
+
+    <script type="text/javascript" src="../filedrop.js"></script>
+
+    <script type="text/javascript">
+      /*
+      ===============================================================================
+      Crc32 is a JavaScript function for computing the CRC32 of a string
+      ...............................................................................
+
+      Version: 1.2 - 2006/11 - http://noteslog.com/category/javascript/
+
+      -------------------------------------------------------------------------------
+      Copyright (c) 2006 Andrea Ercolino
+      http://www.opensource.org/licenses/mit-license.php
+      ===============================================================================
+      */
+
+      (function() {
+        var table = "00000000 77073096 EE0E612C 990951BA 076DC419 706AF48F E963A535 9E6495A3 0EDB8832 79DCB8A4 E0D5E91E 97D2D988 09B64C2B 7EB17CBD E7B82D07 90BF1D91 1DB71064 6AB020F2 F3B97148 84BE41DE 1ADAD47D 6DDDE4EB F4D4B551 83D385C7 136C9856 646BA8C0 FD62F97A 8A65C9EC 14015C4F 63066CD9 FA0F3D63 8D080DF5 3B6E20C8 4C69105E D56041E4 A2677172 3C03E4D1 4B04D447 D20D85FD A50AB56B 35B5A8FA 42B2986C DBBBC9D6 ACBCF940 32D86CE3 45DF5C75 DCD60DCF ABD13D59 26D930AC 51DE003A C8D75180 BFD06116 21B4F4B5 56B3C423 CFBA9599 B8BDA50F 2802B89E 5F058808 C60CD9B2 B10BE924 2F6F7C87 58684C11 C1611DAB B6662D3D 76DC4190 01DB7106 98D220BC EFD5102A 71B18589 06B6B51F 9FBFE4A5 E8B8D433 7807C9A2 0F00F934 9609A88E E10E9818 7F6A0DBB 086D3D2D 91646C97 E6635C01 6B6B51F4 1C6C6162 856530D8 F262004E 6C0695ED 1B01A57B 8208F4C1 F50FC457 65B0D9C6 12B7E950 8BBEB8EA FCB9887C 62DD1DDF 15DA2D49 8CD37CF3 FBD44C65 4DB26158 3AB551CE A3BC0074 D4BB30E2 4ADFA541 3DD895D7 A4D1C46D D3D6F4FB 4369E96A 346ED9FC AD678846 DA60B8D0 44042D73 33031DE5 AA0A4C5F DD0D7CC9 5005713C 270241AA BE0B1010 C90C2086 5768B525 206F85B3 B966D409 CE61E49F 5EDEF90E 29D9C998 B0D09822 C7D7A8B4 59B33D17 2EB40D81 B7BD5C3B C0BA6CAD EDB88320 9ABFB3B6 03B6E20C 74B1D29A EAD54739 9DD277AF 04DB2615 73DC1683 E3630B12 94643B84 0D6D6A3E 7A6A5AA8 E40ECF0B 9309FF9D 0A00AE27 7D079EB1 F00F9344 8708A3D2 1E01F268 6906C2FE F762575D 806567CB 196C3671 6E6B06E7 FED41B76 89D32BE0 10DA7A5A 67DD4ACC F9B9DF6F 8EBEEFF9 17B7BE43 60B08ED5 D6D6A3E8 A1D1937E 38D8C2C4 4FDFF252 D1BB67F1 A6BC5767 3FB506DD 48B2364B D80D2BDA AF0A1B4C 36034AF6 41047A60 DF60EFC3 A867DF55 316E8EEF 4669BE79 CB61B38C BC66831A 256FD2A0 5268E236 CC0C7795 BB0B4703 220216B9 5505262F C5BA3BBE B2BD0B28 2BB45A92 5CB36A04 C2D7FFA7 B5D0CF31 2CD99E8B 5BDEAE1D 9B64C2B0 EC63F226 756AA39C 026D930A 9C0906A9 EB0E363F 72076785 05005713 95BF4A82 E2B87A14 7BB12BAE 0CB61B38 92D28E9B E5D5BE0D 7CDCEFB7 0BDBDF21 86D3D2D4 F1D4E242 68DDB3F8 1FDA836E 81BE16CD F6B9265B 6FB077E1 18B74777 88085AE6 FF0F6A70 66063BCA 11010B5C 8F659EFF F862AE69 616BFFD3 166CCF45 A00AE278 D70DD2EE 4E048354 3903B3C2 A7672661 D06016F7 4969474D 3E6E77DB AED16A4A D9D65ADC 40DF0B66 37D83BF0 A9BCAE53 DEBB9EC5 47B2CF7F 30B5FFE9 BDBDF21C CABAC28A 53B39330 24B4A3A6 BAD03605 CDD70693 54DE5729 23D967BF B3667A2E C4614AB8 5D681B02 2A6F2B94 B40BBE37 C30C8EA1 5A05DF1B 2D02EF8D";
+
+        /* Number */
+        CRC32 = function( /* String */ str, /* Number */ crc ) {
+          if( crc == window.undefined ) crc = 0;
+          var n = 0; //a number between 0 and 255
+          var x = 0; //an hex number
+
+          crc = crc ^ (-1);
+          for( var i = 0, iTop = str.length; i < iTop; i++ ) {
+            n = ( crc ^ str.charCodeAt( i ) ) & 0xFF;
+            x = "0x" + table.substr( n * 9, 8 );
+            crc = ( crc >>> 8 ) ^ x;
+          }
+          return crc ^ (-1);
+        };
+      })();
+
+      function InitDemo() {
+        window.fd.onObjCall = function (event, args) {
+          var id = '_on' + event.replace(/^./, function (s) { return s.toUpperCase(); });
+          fd.SetClass(id, 'ok');
+
+          var log = fd.ByID('log');
+          var handlers = this.on[event] ? this.on[event].length : 0;
+          var line = '  ' + event + ' event (' + handlers + ' hooks)\n';
+          if (log.value.substr(0, line.length) != line) {
+            log.value = line + log.value;
+          }
+        }
+
+        window.ZoneURL = 'upload.php';
+        window.LastZoneFiles = null;
+        window.OrigZoneHTML = fd.ByID('zone').innerHTML;
+
+        window.Zone = CreateFileDrop('zone');
+      }
+
+      function CreateFileDrop(id) {
+        var zone = new FileDrop(id, {iframe: {url: window.ZoneURL}});
+        SetupFileDrop(zone);
+        return zone;
+      }
+
+        function SetupFileDrop(zone) {
+          zone.on.iframeSetup.push(function () {
+            fd.ByID('log').value = '\nSending data via <'+'iframe>...\n\n' + fd.ByID('log').value;
+          });
+
+          zone.on.iframeDone.push(function (resp) {
+            fd.ByID('response').value = 'IFrame upload response: ' + resp.responseText;
+          });
+
+          zone.on.send.push(function (files) {
+            window.LastZoneFiles = [];
+
+            for (var i = 0; i < files.length; i++) {
+              var file = files[i];
+              window.LastZoneFiles.push(file);
+
+              if (i == 0) {
+                file.on.done.push(function (xhr) {
+                  fd.ByID('response').value = xhr.responseText;
+                });
+              }
+
+              file.on.done.push(function (xhr) {
+                var file = this;
+
+                if (window.FileReader) {
+                  var reader = new FileReader;
+
+                  reader.onload = function (e) {
+                    var data = e.target.result;
+
+                    var serverCRC = ( xhr.responseText.match(/CRC32\s*=\s*([\dA-Fa-f]{8})/i) || [] )[1]
+                    if (serverCRC && data && data.length < 512 * 1024) {
+                      var origCRC = CRC32(data);
+                      if (origCRC) {
+                        if (origCRC < 0) { origCRC += 4294967296; }
+
+                        if (parseInt(serverCRC, 16) == origCRC) {
+                          if (console) { console.log('Received CRC32 ' + serverCRC + ' is fine.'); }
+                        } else if (fd.isFirebug) {
+                          console.error('Wrong CRC32 of the received file!');
+                        }
+                      }
+                    }
+                  }
+
+                  reader.readAsBinaryString(file.nativeFile);
+                }
+              });
+
+              file.on.progress.push(function (current, total) {
+                fd.ByID('log').value = current + ' / ' + total + '\n' + fd.ByID('log').value;
+              });
+
+              file.on.error.push(function (e, xhr) {
+                if (xhr) {
+                  fd.ByID('response').value = '-- XMLHttpRequest error -- status = ' + xhr.status;
+                } else {
+                  fd.ByID('log').value = e + '\n' + fd.ByID('log').value;
+                }
+              });
+
+              if (i == 0) {
+                fd.ByID('log').value = '\n' + fd.ByID('log').value;
+              }
+
+              fd.ByID('log').value = file.name + ' (' + file.size +
+                                     ' bytes)...\n' + fd.ByID('log').value;
+
+              if (i == files.length - 1) {
+                fd.ByID('log').value = '\n' + fd.ByID('log').value;
+              }
+
+              var url = fd.HasClass('causeError', 'down') ? 'not-existing.php' : window.ZoneURL;
+              file.SendTo(url);
+            }
+          });
+        }
+
+      function Multifile(btn) {
+        Zone.Multiple( !fd.HasClass(btn, 'down') );
+        fd.SetClass(btn, 'down', Zone.Multiple());
+      }
+
+      function CauseError(btn) {
+        var error = !fd.HasClass(btn, 'down');
+        window.Zone.opt.iframe.url = error ? 'not-existing.php' : window.ZoneURL;
+        fd.SetClass(btn, 'down', error);
+      }
+
+      function ForceIFrame(btn) {
+        var force = !fd.HasClass(btn, 'down');
+        window.Zone.opt.iframe.force = force;
+        fd.SetClass(btn, 'down', force);
+      }
+
+      function AbortAll() {
+        window.Zone.AbortIFrame();
+
+        var files = window.LastZoneFiles;
+        if (fd.IsArray(files)) {
+          for (var i = 0; i < files.length; i++) {
+            files[i].Abort();
+          }
+        }
+      }
+
+      function AddFileDrop(flags, btn) {
+        var node = flags.firstChild;
+
+          while (node && ( !fd.IsTag(node) || (node != btn && node.style.display != 'none') )) {
+            if (fd.IsTag(node)) { node.style.display = 'none'; }
+            node = node.nextSibling;
+          }
+
+        var firstZone = fd.ByID('zone');
+        if (firstZone) {
+          var id, i = 2;
+          do {
+            id = 'zone_' + i;
+            i++;
+          } while (fd.ByID(id));
+
+          var newNode = document.createElement('fieldset');
+              newNode.setAttribute('id', id);
+              newNode.innerHTML = window.OrigZoneHTML;
+
+          firstZone.parentNode.insertBefore(newNode, firstZone.nextSibling);
+
+          CreateFileDrop(id);
+        }
+      }
+    </script>
+
+    <style type="text/css">
+      .fd-zone { position: relative; overflow: hidden; }
+      .fd-zone.over { border-color: maroon; }
+      .fd-file { opacity: 0; font-size: 118px; position: absolute; right: 0; top: 0; z-index: 1; padding: 0; margin: 0; cursor: pointer; filter: alpha(opacity=0); font-family: sans-serif; }
+
+      body { background: #EEE; font-size: 14px; }
+      img { border: 0; }
+      a { text-decoration: none; color: navy; }
+      a:hover { text-decoration: underline; }
+      #wrapper { max-width: 700px; margin: 1em auto; }
+      fieldset { padding: 0.5em 1em 1em 1em; margin: 1em 0; border: 3px double silver; border-color: silver gray gray silver; background: #F9F9F9; }
+      legend { font-weight: bold; color: black; }
+      .fd-zone { width: 15em; text-align: center; margin: 0 auto; padding: 0 0.75em; clear: both; border-color: silver #ADADAD #ADADAD silver; }
+      .fd-zone:hover { background: white; }
+      .fd-zone p { margin: 0.75em 0; }
+      .flags { text-align: center; margin: 1em 0 2.5em 0; }
+      .flag { background: #F9F9F9; border: 1px outset gray; text-align: center; padding: 0.2em 0.75em; margin: 0 auto; cursor: pointer; font-weight: bold; display: inline-block; }
+      .flag:hover { border-color: silver; }
+      .flag:active, .flag.down { border-style: inset; background: white; }
+      .flag + .flag { margin-left: 0.5em; }
+      input[type=checkbox] { padding: 0; margin: 0; }
+      h1 { font-size: 1.5em; text-align: center; }
+      h2 { margin: 1.5em 0 0; }
+      h2.subtitle { font-size: 1em; text-align: center; font-weight: normal; margin-bottom: 2em; }
+      h1, h2.subtitle { text-shadow: white 1px 1px 0; }
+      h2.subtitle { font-family: Arial, Helvetica, sans-serif; }
+      h3 { margin: 0 0 1em 0; }
+      ul { margin: 1em 0 1em 1.5em; padding: 0; }
+      #compat ul { margin: 0 1em; }
+      #compat li + li { margin-top: 0.5em; }
+      #compat .ua { margin-left: 0.25em; }
+      #log { float: right; height: 100%; overflow: scroll; margin-left: 1em; }
+      #footer { text-align: center; font-size: 0.9em; color: gray; }
+      #status .test { display: inline-block; width: 13px; height: 13px; background: no-repeat center center url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAANCAYAAABlyXS1AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAGGSURBVHjaAHkBhv4Be0uWQhUTEWUXFxkrAwACBenv69bn2N2T9+3twAQaGxd4QzhHRfz3/gD+/v0AJRv9KN0SGDmbtZFFAwgBCwn39/YTlrOIn+bu5OohFSYnEw8VD87axN0E1+HOn/v5+bH99ALp7uvuZPT78VEAAP8A+v77AQQQCRT7KRU26QQVBCQhKR5q/fn9BOLy3vf8+v7CAjwjTAD7+/sLFiARixQUEzH6AfcA1N7Slvr6+88E9/j3AAsNCUIjKx9MDQoOALu/t7u3yKyDAQIC/AQDAgUADxEPKCUwIQT59fv8y83JmNvp0fEJBQsABPL57AAA7fvi1cvZ+fXz9+sOABbWSSRfAAEAAQAE+fn4Afz6BwHx8PL08vDz6BQTGPoCAwMAAAAAAAQbESIIKDMiZktbPxPu6fIT++4BSwMEApMAAAAABObz4PsC3frFzr8WQe7t7+3E2brRBAQDAAAAAAABVC5pAOTv3A7w+Ow6AP8B7QYGBcwAAAD/AAAAAAMAjNKqatkLNN8AAAAASUVORK5CYII="); }
+      #status .test.ok { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAANkE3LLaAgAAAjpJREFUeJy90k1IkwEcx/Hvs2evMt1KJ741Wy0zexMy0US6WHSKgii8pAUZKUEFubSgkjKRQgT1kL0hZNChMpJCi/RQGQll0sBE09wWw5c2c5rbs+fptIgutQ59758//8MP/nNCcsWSm5ajS+8C6qh1con5So+3W3ni6lTiS81XAe1f45QDsXV3JloVT2BC8c57lGZng6LZJVz8+Ub8fpVD0Mri1DVqf8dpZYYLZ6pOOjJi1jDqHyIoS7xwdyMbla1qANNO7fHDx0rrZPV3WufbpOl26iM4/YjuXEXlwdNWvZ3xuY9IssKDT23c6+0l3McjUVfEoe2Vm5vyEwuJ1yVgyRO3jflHfIFBXtvK1dUljt016ZpM/MFJZiUfTyfbed7/Ct9t6hmiRkzeR2Moddo6G5xBJYZJjEkiMUcoIvtrzo7iLeUpOhu+oJcpycPA3DPefXiP6zoN0gAOQBYRyLRslAqmtS7coSF8iguNQVFZs0yrtYIGb2iE0eBb3OFBvMMzOBuk2oV+qgAZQFz8zMvwPGkrc3XZQlyIb4KfsNqPUYhFL6pRqWQMOjULEwJ9l3yXZ/uojmAAEQgFhukKLsq2rLyE9XqTiiTtMuwxWaQb7Cw3ZjDjCtBx1tk41SNX/oojBwBCfiddQUlalVtgX5tqsmHVrWCdKZfxL2M0nXrY4nksnQDCf9pL3IZy/f1m917ljXxD6fCeV+zF2ugWB5gLHcbOFtceZVOZ4RagjwZHSrLkUwHE/guOqh90ld9+870vDgAAAABJRU5ErkJggg=="); }
+      #response { width: 100%; }
+      #features { float: right; margin: 0 0 0 2.5em; }
+      #features li + li { margin-top: 0.25em; }
+      #features input { background: #F5F5F5; width: 100%; border: 1px solid silver; font-size: 0.9em; margin-top: 0.25em; padding: 0.15em; color: navy; }
+      #download { height: 40px; font-size: 20px; }
+      #download img { vertical-align: bottom; margin: 1px 0.25em 0 0; }
+    </style>
+
+  </head>
+  <body onload="InitDemo();">
+    <div id="wrapper">
+      <h1><a href="http://proger.i-forge.net/FileDrop">FileDrop JavaScript class demo</a></h1>
+      <h2 class="subtitle">Cross-browser dependencies-free minimalistic JavaScript class for <strong>AJAX</strong> and <strong>Drag &amp; Drop</strong> file upload.</h2>
+
+      <ul id="features">
+        <li>490 lines of code; 8/3 KiB minified/gzip'd</li>
+        <li>No dependencies, Flash or applets</li>
+        <li>Progress, error, done and more callbacks</li>
+        <li>Graceful degradation and IFrame fallback</li>
+        <li>Multiple file selection</li>
+        <li>Any number of independent FileDrops</li>
+        <li>
+          Hotlinking for latest script version: <br />
+          <input type="text" readonly="readonly" value="http://proger.i-forge.net/filedrop-min.js" onfocus="this.select();" />
+        </li>
+      </ul>
+
+      <fieldset id="compat">
+        <legend>Compatibility</legend>
+
+        <ul>
+          <li>
+            <strong>Drag &amp; drop:</strong>
+            <img class="ua" src="ff.gif" alt="Firefox" /> 3.6+
+            <img class="ua" src="chrome.gif" alt="Chrome" /> 7+
+            <img class="ua" src="iron.png" alt="SRWare Iron" /> 4+
+          </li>
+          <li>
+            <strong>Multiple file dialog selection:</strong>
+            <img class="ua" src="ff.gif" alt="Firefox" /> 3.6+
+            <img class="ua" src="chrome.gif" alt="Chrome" /> 7+
+            <img class="ua" src="iron.png" alt="SRWare Iron" /> 4+
+            <img class="ua" src="safari.png" alt="Safari" /> 5+
+          </li>
+          <li>
+            <strong>Upload via XMLHttpRequest:</strong>
+            <img class="ua" src="ff.gif" alt="Firefox" /> 3.6+
+            <img class="ua" src="chrome.gif" alt="Chrome" /> 7+
+            <img class="ua" src="iron.png" alt="SRWare Iron" /> 4+
+            <img class="ua" src="safari.png" alt="Safari" /> 5+
+          </li>
+          <li>
+            <strong>Upload via IFrame:</strong>
+            all above plus
+            <img class="ua" src="ie.png" alt="Internet Explorer" /> 6+
+            <img class="ua" src="opera.gif" alt="Opera" /> 11.61
+          </li>
+        </ul>
+      </fieldset>
+
+      <div id="download">
+        <a href="http://proger.i-forge.net/FileDrop_%E2%80%93_cross-browser_JavaScript_Drag_-amp_Drop_file_upload/7CC#download">
+          <img src="download.png" alt="" />
+          Download FileDrop
+        </a>
+        &bull;
+        <a href="http://proger.i-forge.net/FileDrop">API help</a>
+      </div>
+
+      <div class="clearer"></div>
+
+      <fieldset id="zone">
+        <legend>Drop a file inside&hellip;</legend>
+        <p>Or click here to <em>Browse</em>...</p>
+      </fieldset>
+
+      <div class="flags" id="flags">
+        <div id="multifile" class="flag" title="For Firefox/Chrome only. Drag &amp; drop supports multiple files regardless of this setting." onclick="Multifile(this);">Multifile (dialog only)</div>
+        <div id="causeError" class="flag" onclick="CauseError(this);">Cuase error</div>
+        <div class="flag" onclick="ForceIFrame(this);" title="For debugging Firefox/Chrome/Opera. Doesn't work with drag &amp; drop.">Force IFrame</div>
+        <div class="flag" onclick="AbortAll();" title="Works on XHR &amp; IFrame.">Abort</div>
+        <div class="flag" onclick="AddFileDrop(this.parentNode, this);">Add FileDrop</div>
+      </div>
+
+      <fieldset id="status">
+        <legend>Status</legend>
+
+        <textarea id="log" cols="30" rows="21" readonly="readonly"></textarea>
+
+        <div class="box">
+          <h3>Drag events</h3>
+          <ul>
+            <li>dragEnter: <span class="test" id="_onDragEnter"></span> - user drags an object into the drop zone (<strong>Firefox</strong>) or document (<strong>Chrome</strong>).</li>
+            <li>dragLeave: <span class="test" id="_onDragLeave"></span> - dragged object has left the drop zone or document.</li>
+          </ul>
+
+          <h3>Misc events</h3>
+          <ul>
+            <li>upload: <span class="test" id="_onUpload"></span> - files were dropped or selected using the <strong>Browse</strong> button.</li>
+            <li>send: <span class="test" id="_onSend"></span> - file info is normalized (cross-browser) and ready to send.</li>
+            <li>iframeDone: <span class="test" id="_onIframeDone"></span> - file was uploaded using <strong>iframe</strong>.</li>
+          </ul>
+        </div>
+
+        <div class="box">
+          <h3>Setup events</h3>
+          <ul>
+            <li>inputSetup: <span class="test" id="_onInputSetup"></span> - a hidden file input is being set up.</li>
+            <li>fileSetup: <span class="test" id="_onFileSetup"></span> - file info is uniformized (<strong>Firefox/Chrome</strong> only).</li>
+            <li>iframeSetup: <span class="test" id="_onIframeSetup"></span> - a file is about to be sent via <strong>iframe</strong>.</li>
+          </ul>
+
+          <h3>XMLHttpRequest events</h3>
+          <ul>
+            <li>sendXHR: <span class="test" id="_onSendXHR"></span> - an <strong>XHR</strong> needs to be <strong>send()</strong>.</li>
+            <li>progress: <span class="test" id="_onProgress"></span> - data upload progress, in <strong>Firefox</strong> only works on large files.</li>
+            <li>error: <span class="test" id="_onError"></span> - request has ended with an error.</li>
+            <li>done: <span class="test" id="_onDone"></span> - data has been successfully uploaded.</li>
+          </ul>
+        </div>
+
+        <h3>Last server response to upload</h3>
+        <input type="text" id="response" readonly="readonly" size="100" />
+      </fieldset>
+
+      <h2>
+        Known problems
+        &nbsp;
+        (<a href="http://proger.i-forge.net/FileDrop#comments">report</a>)
+      </h2>
+      <ul>
+        <li><strong><img class="ua" src="ff.gif" alt="Firefox" /> Firefox 3.6 &amp; <img class="ua" src="opera.gif" alt="Opera" /> Opera</strong> don't allow overriding of <kbd>cursor</kbd> CSS for <kbd>&lt;input type="file"&gt;</kbd>.</li>
+        <li><strong><img class="ua" src="ff.gif" alt="Firefox" /> Firefox 13</strong> or so has started to ignore <em>overflow: hidden</em> styles on <kbd>&lt;fieldset&gt;</kbd> &ndash; FileDrop will automatically wrap such dropzones into <kbd>&lt;div&gt;</kbd> with proper styles but make sure this doesn't affect your look (for example, <em>margin</em> might display differently).</li>
+        <li><strong><img class="ua" src="ie.png" alt="Internet Explorer" /> IE 6</strong> fires <kbd>ondrop</kbd> on <kbd>&lt;input type="file"&gt;</kbd> but when the form is submitted this way sends an empty POST body so drag & drop is disabled for <img class="ua" src="ie.png" alt="Internet Explorer" /> IE 6- (normal upload by clicking on the drop zone is still possible using regular <kbd>&lt;iframe&gt;</kbd>). <img class="ua" src="ie.png" alt="Internet Explorer" /> IE 8 doesn't fire <kbd>ondrop</kbd>.</li>
+      </ul>
+
+      <p id="footer">in public domain | by <a href="http://i-forge.net/me">Proger_XP</a></p>
+    </div>
+  </body>
+</html>
