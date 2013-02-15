@@ -82,7 +82,7 @@
 
 ## jQuery integration
 
-Drop zone events are prefixed with **fd** while individual file events start with **file**. DOM node events are triggered before those assigned to %%obj.on.XXX%% arrays and if a node handler returns non-**null** value %%on%%'s events are skipped.
+Drop zone events are prefixed with **fd** while individual file events start with **file**. DOM node events are triggered before those assigned to **obj.on.XXX** arrays and if a node handler returns a non **null** value **on**'s events are skipped.
 
 ```JS
   fd.jQuery();  // you can also pass an object like 'jQuery'.
