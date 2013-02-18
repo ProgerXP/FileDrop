@@ -21,24 +21,30 @@ fd.IsTag = function (element, tag) {
          ( !tag || element.tagName.toUpperCase() == tag.toUpperCase() );
 }
 
-fd.NewXHR = function () {
+fd.NewXHR = (function determineXHRmethod() {
+  var method;
+
   try {
-    return new XMLHttpRequest;
+    method = new XMLHttpRequest;
   } catch (e) {
     var activex = new Array("MSXML2.XMLHTTP.6.0",
-                             "MSXML2.XMLHTTP.5.0",
-                             "MSXML2.XMLHTTP.4.0",
-                             "MSXML2.XMLHTTP.3.0",
-                             "MSXML2.XMLHTTP",
-                             "Microsoft.XMLHTTP");
+                            "MSXML2.XMLHTTP.5.0",
+                            "MSXML2.XMLHTTP.4.0",
+                            "MSXML2.XMLHTTP.3.0",
+                            "MSXML2.XMLHTTP",
+                            "Microsoft.XMLHTTP");
 
     for (var i = 0; i < activex.length && !request; i++) {
       try {
-        return new ActiveXObject(activex[i]);
+        method = new ActiveXObject(activex[i]);
       } catch (e) {}
     }
   }
-}
+
+  return function getXHRmethod(){
+    return method;
+  }
+}())
 
 fd.IsArray = function (aVar) {
   return Object.prototype.toString.call(aVar) === '[object Array]';
