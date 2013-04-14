@@ -279,8 +279,14 @@ fd.DropHandle = function (zone, opt) {
   self.SendViaIFrame = function (url) {
     url = url || self.opt.iframe.url;
     var form = (self.opt.input || {}).form;
-
+    
     if (url && form) {
+      // IE will trigger <input>'s onchange on drop even though it won't populate it.
+      if (!('__proto__' in {}) && (!self.opt.input.file.value || 
+          self.opt.input.file.value.length < 3)) { 
+        return;
+      }
+
       do { var cb = fd.RandomID(); } while (window[cb]);
 
       window[cb] = function (resp) {
