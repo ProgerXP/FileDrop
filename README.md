@@ -93,7 +93,7 @@ Drop zone events are prefixed with **fd** while individual file events start wit
     .filedrop()
     // jQuery always passes event object as the first argument.
     .on('fdsend', function (e, files) {
-      $.each(files, function (file) {
+      $.each(files, function (i, file) {
         file.SendTo('upload.php');
       });
     })
