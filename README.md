@@ -20,7 +20,7 @@
 
 ## Basic example
 
-[Live demo](filedropjs.org/demo/basic.html) →
+[Live demo](http://filedropjs.org/demo/basic.html) →
 
 ```HTML
 <!DOCTYPE html>
