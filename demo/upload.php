@@ -1,4 +1,11 @@
 <?php
+/*!
+  FileDrop Revamped - server-side upload handler sample
+  in public domain  | http://filedropjs.org
+*/
+
+// If an error causes output to be generated before headers are sent - catch it.
+ob_start();
 $charset = '; charset=utf-8';
 $callback = &$_REQUEST['fd-callback'];
 

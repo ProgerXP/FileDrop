@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>FileDrop Test Sheet</title>
+
+    <style type="text/css">
+      body { margin: 5% auto; width: 500px; }
+      #okmsg { display: none; }
+      body.ok #okmsg { display: block; }
+      #okmsg b { background: #5a5; color: white; padding: 0.2em 0.5em; }
+      body.ok { background: #cfc; }
+      body.fail { background: #fcc; }
+      ul u { background: #ff6; text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <h2>FileDrop Test Sheet</h2>
+    <p>This page tests <a href="http://filedropjs.org">FileDrop</a> global utility methods. If this page backgruond is green then everything went fine for you.</p>
+
+    <p><b>Tested browsers that pass:</b></p>
+    <ul>
+      <li>
+        <b>Internet Explorer:</b>
+        <u>XP SP3:</u> 6
+        <u>Win7 SP1:</u> 8
+      </li>
+      <li>
+        <b>Internet Explorer x64:</b>
+        <u>XP SP2 x64:</u> 6, 7
+      </li>
+      <li>
+        <b>Firefox:</b>
+        <u>XP SP3:</u> 26.0
+      </li>
+      <li>
+        <b>Firefox x64:</b>
+        <u>XP SP2 x64:</u> 23.0a1
+      </li>
+      <li>
+        <b>Chrome:</b>
+        <u>XP SP2 x64:</u> 29.0
+      </li>
+      <li>
+        <b>Opera:</b>
+        <u>XP SP2 x64:</u> 12.16
+      </li>
+      <li>
+        <b>Safari:</b>
+        <u>XP SP3:</u> 5.1.7
+        <u>Win7 SP1:</u> 5.1.7
+      </li>
+    </ul>
+
+    <p id="okmsg"><b>Success.</b></p>
+    <p><b><code id="ua"></code></b></p>
+    <div id="log" style="font-family: monospace"></div>
+
+    <div style="position: absolute; left: -999px; top: -999px">
+      <a id="idok" href="#"></a>
+      <iframe id="ifr" src="about:blank"></iframe>
+    </div>
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="../filedrop.js"></script>
+
+    <script type="text/javascript">
+      // IE 6 or IE 7.
+      var ie6 = fd.isIE6
+      // IE 8 and below.
+      var ie8 = false
+    </script>
+
+    <!--[if lte IE 8 ]>
+      <script type="text/javascript">
+        var ie8 = true
+      </script>
+    <![endif]-->
+
+    <script type="text/javascript">
+      var real = true
+
+      function log(str) {
+        var p = document.createElement('p')
+        p.innerHTML = str
+        fd.byID('log').appendChild(p)
+      }
+
+      function loop(func, max) {
+        for (var i = 0; i < (max || 100); i++) { func(i) }
+      }
+
+      function fail() {
+        if (real) {
+          log('<b>Failed.</b>')
+          fd.setClass(document.body, 'ok', false)
+          fd.setClass(document.body, 'fail')
+          debugger
+        }
+
+        throw 'Failure.'
+      }
+
+      function eqo(a, b, recursive) {
+        if (typeof a != 'object' || typeof b != 'object') {
+          fail()
+        }
+
+        b = $.extend({}, b)
+
+        for (var k in a) {
+          is(k in b)
+
+          if (recursive && typeof a[k] == 'object') {
+            eqo(a[k], b[k], true)
+          } else {
+            eq(b[k], a[k])
+          }
+
+          delete b[k]
+        }
+
+        for (var k in b) { fail() }
+      }
+
+      function eqor(a, b) { eqo(a, b, true) }
+      function eq(a, b) { a == b || fail() }
+      function is(expr) { expr || fail() }
+      function not(expr) { expr && fail() }
+
+      var tests = {
+        eq: function () {
+          is(true)
+          not(false)
+          eq(1, 1)
+          eqo([], [])
+          eqo([1, 2], [1, 2])
+          eqo({}, {})
+          eqo({a: 1, b: 2}, {a: 1, b: 2})
+
+          var toFail = [
+            function () { fail() },
+            function () { is(false) },
+            function () { not(true) },
+            function () { eq(1, 2) },
+            function () { eq([], []) },
+            function () { eq({}, {}) },
+            function () { eqo([1, 3], [1, 2]) },
+            function () { eqo([1], [1, 2]) },
+            function () { eqo([1, 2], [1]) },
+            function () { eqo([], null) },
+            function () { eqo(null, {}) },
+            function () { eqo({a: 1}, {a: 1, b: 2}) },
+            function () { eqo({a: 1, c: 2}, {a: 1, b: 2}) },
+            function () { eqo({c: 2}, {}) }
+          ]
+
+          real = false
+
+          for (var i = 0; i < toFail.length; i++) {
+            try {
+              toFail
+              fail()
+            } catch (e) { }
+          }
+
+          real = true
+        },
+
+        randomID: function (unique) {
+          var t = fd[unique ? 'uniqueID' : 'randomID']
+
+          var parts = t().split('_')
+          eq(parts[0], 'fd')
+          is(parts[1].match(/^[\d.]+$/))
+
+          var parts = t('foo').split('_')
+          eq(parts[0], 'foo')
+          is(parts[1].match(/^[\d.]+$/))
+
+          is(t() != t())
+          loop(function () { t() })
+        },
+
+        uniqueID: function () {
+          tests.randomID(true)
+
+          loop(function () {
+            var id = fd.uniqueID
+            not( document.getElementById(id) )
+          })
+        },
+
+        byID: function () {
+          not(fd.byID('body'))
+          not(fd.byID('BODY'))
+          not(fd.byID( {foo: 1} ))
+          not(fd.byID(null))
+          not(fd.byID(window))
+
+          var p = document.createElement('p')
+          eq(fd.byID(p), p)
+          eq(fd.byID(document.body), document.body)
+          eq(fd.byID('idok'), document.getElementById('idok'))
+
+          var el = document.createElement('p')
+          el.id = fd.randomID()
+          not(fd.byID(el.id))
+          eq(fd.byID(el), el)
+
+          document.body.appendChild(el)
+          eq(fd.byID(el.id), el)
+
+          if (ie6) {
+            eq(fd.byID( el.id.toUpperCase() ), el)
+          } else {
+            not(fd.byID( el.id.toUpperCase() ))
+          }
+        },
+
+        isTag: function () {
+          not(fd.isTag('idok'))
+          not(fd.isTag('wrrrrrong'))
+          not(fd.isTag({foo: 1}))
+          not(fd.isTag(null))
+          not(fd.isTag(window))
+          is(fd.isTag(document.body))
+          is(fd.isTag(document.body, 'BoDy'))
+          not(fd.isTag(document.body, 'head'))
+
+          is(fd.isTag(fd.byID('idok'), 'a'))
+          is(fd.isTag(fd.byID('idok'), 'A'))
+          not(fd.isTag(fd.byID('idok'), 'div'))
+          not(fd.isTag(fd.byID('idok'), 'DiV'))
+          is(fd.isTag(document.createElement('p')))
+          not(fd.isTag(document.createElement('p'), 'div'))
+        },
+
+        newXHR: function () {
+          // IE 7 includes XMLHttpRequest but instanceof fails on its object.
+          if (window.XMLHttpRequest && !ie6) {
+            var xhr = new XMLHttpRequest
+            is(fd.newXHR() instanceof XMLHttpRequest)
+          } else {
+            var xhr = new ActiveXObject('MSXML2.XMLHTTP')
+          }
+
+          if (ie6) {
+            var fnType = 'unknown'
+          } else if (ie8) {
+            var fnType = 'object'
+          } else {
+            var fnType = 'function'
+          }
+
+          var props = [
+            // property -                 - IE 6-7   - IE 8     - W3C -
+            '  open                         unknown    object     function',
+            '  send                         unknown    object     function',
+            '  abort                        unknown    object     function',
+            '  setRequestHeader             unknown    object     function',
+            '  overrideMimeType             undefined  undefined  function',
+            '  onreadystatechange           unknown    object     object',
+            '  readyState                   number     number     number',
+            '  status                       unknown    unknown    number'
+          ]
+
+          for (var i = 0; i < props.length; i++) {
+            var parts = props[i].replace(/^\s+/, '').split(/\s+/)
+            var type = ie6 ? parts[1] : (ie8 ? parts[2] : parts[3])
+            eq(typeof xhr[parts[0]], type)
+          }
+
+          loop(function () { is(fd.newXHR() !== xhr) })
+        },
+
+        isArray: function () {
+          is(fd.isArray([]))
+          is(fd.isArray([]))
+          is(fd.isArray(new Array))
+          not(fd.isArray({}))
+          not(fd.isArray('foo'))
+          not(fd.isArray(null))
+          not(fd.isArray(undefined))
+          not(fd.isArray($('a')))
+          is(fd.isArray($('a').toArray()))
+          not(fd.isArray(/x/))
+          not(fd.isArray(new Function))
+          not(fd.isArray(arguments))
+        },
+
+        toArray: function () {
+          var a = []
+          eq(fd.toArray(a).length, 0)
+          is(a !== fd.toArray(a))
+
+          fd.toArray(a).push('x')
+          eq(a.length, 0)
+
+          a.push('foo')
+          eqo(fd.toArray(a), a)
+          is(a !== fd.toArray(a))
+
+          eqo(fd.toArray(['foo'], 1), [])
+          eqo(fd.toArray(['foo'], 999), [])
+          eqo(fd.toArray('foo'), ['foo'])
+          eqo(fd.toArray('foo', 1), [])
+          eqo(fd.toArray('foo', 999), [])
+
+          var el = fd.byID('idok')
+          eqo(fd.toArray(el), [el])
+          eqo(fd.toArray([el]), [el])
+          eqo(fd.toArray(el, 1), [])
+          // jQuery collection looks like array but it's not.
+          var o = $(el)
+          eqo(fd.toArray(o), [o])
+
+          eqo(fd.toArray(null), [])
+          eqo(fd.toArray(undefined), [])
+          eqo(fd.toArray(false), [false])
+          eqo(fd.toArray(true), [true])
+          eqo(fd.toArray([]), [])
+          var o = {}
+          eqo(fd.toArray(o), [o])
+          eqo(fd.toArray(''), [''])
+          eqo(fd.toArray(0), [0])
+          eqo(fd.toArray(0.0), [0.0])
+          eqo(fd.toArray(1.1), [1.1])
+          eqo(fd.toArray([1.1]), [1.1])
+          eqo(fd.toArray(1), [1])
+          eqo(fd.toArray([1]), [1])
+
+          var o = {foo: 1}
+          eqo(fd.toArray(o), [o])
+          is(o === fd.toArray(o)[0])
+          eqo(fd.toArray(o, 1), [])
+          eqo(fd.toArray([o]), [o])
+          o.length = 2
+          eqo(fd.toArray(o), [o])
+
+          a = new Array('foo', 'bar')
+          eqo(fd.toArray(a), a)
+          is(a !== fd.toArray(a))
+
+          eqo(fd.toArray(a, 1), ['bar'])
+          eqo(fd.toArray(a, 2), [])
+
+          var f = function () { }
+          eqo(fd.toArray(f), [f])
+          eqo(fd.toArray([f]), [f])
+
+          var r = /x/
+          eqo(fd.toArray(r), [r])
+          eqo(fd.toArray([r]), [r])
+
+          ;(function () {
+            eqo(fd.toArray(arguments), ['a', 'b'])
+            eqo(fd.toArray(arguments, 1), ['b'])
+            eqo(fd.toArray(arguments, 2), [])
+          })('a', 'b')
+        },
+
+        addEvent: function () {
+          var fired
+          var cb = function () { fired++ }
+          var el = fd.byID('ifr')
+          var timeout = setTimeout(fail, 1000)
+
+          function fire(cb) {
+            fired = 0
+            el.contentWindow.location.reload()
+            setTimeout(cb, 100)
+          }
+
+          fd.addEvent(el, 'load', cb)
+          fire(function () {
+            eq(fired, 1)
+            next()
+          })
+
+          function next() {
+            // Need to attach different function with different code.
+            fd.addEvent(el, 'load', function () { return fired++ })
+            fire(function () {
+              eq(fired, 2)
+              clearTimeout(timeout)
+            })
+          }
+
+          // No exceptions testing.
+          fd.addEvent()
+          fd.addEvent(el)
+          fd.addEvent(el, 'click')
+          fd.addEvent(el, null, new Function)
+          fd.addEvent(null, 'click', new Function)
+        },
+
+        stopEvent: function () {
+          var active = true
+          var fired = 0
+
+          fd.addEvent(fd.byID('idok'), 'click', function (e) {
+            active && fd.stopEvent(e)
+            fired++
+          })
+          fd.addEvent(document.body, 'click', function () {
+            active && fail()
+          })
+
+          if (ie8) {
+            $('#idok')[0].click()
+          } else {
+            // Safari doesn't have click() on elements.
+            // Credits to http://stackoverflow.com/questions/7930001/8833025#8833025.
+            var dispatch = document.createEvent('HTMLEvents')
+            dispatch.initEvent('click', true, true)
+            $('#idok')[0].dispatchEvent(dispatch)
+          }
+
+          eq(fired, 1)
+          active = false
+        },
+
+        setClass_hasClass: function () {
+          var $el = $('<p>')
+          var el = $el[0]
+
+          function normClass(str) {
+            return $.trim(str).replace(/(\s)+/g, '$1')
+          }
+
+          function test(ref) {
+            eq(fd.setClass(ref, 'c1'), el)
+            eq(normClass(el.className), 'c1')
+            is(fd.hasClass(el, 'c1'))
+            eq(fd.setClass(ref, 'c1', false), el)
+            eq(normClass(el.className), '')
+            not(fd.hasClass(el, 'c1'))
+            eq(fd.setClass(ref, 'c1', true), el)
+            eq(normClass(el.className), 'c1')
+            is(fd.hasClass(el, 'c1'))
+
+            eq(fd.setClass(ref, 'c2'), el)
+            eq(normClass(el.className), 'c1 c2')
+            is(fd.hasClass(el, 'c1'))
+            is(fd.hasClass(el, 'c2'))
+
+            not(fd.hasClass(el, ''))
+            not(fd.hasClass(el, []))
+            not(fd.hasClass(el, {}))
+            not(fd.hasClass(el, null))
+            not(fd.hasClass(el, undefined))
+            not(fd.hasClass([], ''))
+
+            eq(fd.setClass(ref, 'c', true), el)
+            eq(normClass(el.className), 'c1 c2 c')
+            is(fd.hasClass(el, 'c1'))
+            is(fd.hasClass(el, 'c2'))
+            is(fd.hasClass(el, 'c'))
+
+            eq(fd.setClass(ref, '2', false), el)
+            eq(normClass(el.className), 'c1 c2 c')
+            eq(fd.setClass(ref, 'c', false), el)
+            eq(normClass(el.className), 'c1 c2')
+            eq(fd.setClass(ref, 'c', false), el)
+            eq(normClass(el.className), 'c1 c2')
+            eq(fd.setClass(ref, 'c'), el)
+            eq(normClass(el.className), 'c1 c2 c')
+
+            eq(fd.setClass(ref, '', true), el)
+            eq(normClass(el.className), 'c1 c2 c')
+            eq(fd.setClass(ref), el)
+            eq(normClass(el.className), 'c1 c2 c')
+            eq(fd.setClass(ref, 2), el)
+            eq(normClass(el.className), 'c1 c2 c 2')
+            is(fd.hasClass(el, 2))
+            is(fd.hasClass(el, '2'))
+
+            eq(fd.setClass(ref, 'c1', false), el)
+            eq(normClass(el.className), 'c2 c 2')
+            eq(fd.setClass(ref, 2, false), el)
+            eq(normClass(el.className), 'c2 c')
+            eq(fd.setClass(ref, 'c2', false), el)
+            eq(normClass(el.className), 'c')
+            eq(fd.setClass(ref, 'c', false), el)
+            eq(normClass(el.className), '')
+          }
+
+          test(el)
+
+          var id = fd.randomID()
+          $el.attr('id', id).appendTo('body')
+          test(id)
+
+          not(fd.setClass(null, 'c'))
+          not(fd.setClass(undefined, 'c'))
+          not(fd.setClass('', 'c'))
+          not(fd.setClass(false, 'c'))
+          not(fd.setClass({}, 'c'))
+          not(fd.setClass([], 'c'))
+        },
+
+        extend: function () {
+          var c = {a: [1], c: 'c'}
+          var p = {b: true, c: 'p'}
+          var d
+          function clone() { d = $.extend({}, c) }
+
+          clone()
+          eqo(fd.extend(d, p),            {a: c.a, c: 'c', b: true})
+          clone()
+          eqo(fd.extend(d, p, false),     {a: c.a, c: 'c', b: true})
+          clone()
+          eqo(fd.extend(d, p, true),      {a: c.a, c: 'p', b: true})
+          clone()
+          is(fd.extend(d, p).a === c.a)
+
+          c.b = undefined
+          clone()
+          eqo(fd.extend(d, p),            {a: c.a, c: 'c', b: true})
+          clone()
+          eqo(fd.extend(d, p, false),     {a: c.a, c: 'c', b: true})
+          clone()
+          eqo(fd.extend(d, p, true),      {a: c.a, c: 'p', b: true})
+
+          c.b = null
+          clone()
+          eqo(fd.extend(d, p),            {a: c.a, c: 'c', b: null})
+          clone()
+          eqo(fd.extend(d, p, false),     {a: c.a, c: 'c', b: null})
+          clone()
+          eqo(fd.extend(d, p, true),      {a: c.a, c: 'p', b: true})
+
+          var o = {}
+          is(fd.extend(o, {x: 1}) === o)
+          eqo(o, {x: 1})
+        },
+
+        toBinary: function () {
+          // toBinary() is only used in conjunction with FileAPI which isn't
+          // supported on IE 9 and before.
+          if (ie8) { return }
+
+          var s = 'abc'
+          var b = [s.charCodeAt(s[0]), s.charCodeAt(s[1]), s.charCodeAt(s[2])]
+
+          eq(fd.toBinary(s).byteLength, b.length)
+          // ['a', 'b', 'c']
+          eq(fd.toBinary( s.split(new RegExp('', 'g')) ).byteLength, b.length)
+        },
+
+        callAll: function () {
+
+          var o = {}
+          var fired = 0
+          var e = [function () { fired++ }, function (a) { return 'br' + a }, fail]
+
+          eq(fd.callAll(e, 'eak'), 'break')
+          eq(fired, 1)
+          eq(fd.callAll(e, ['eak']), 'break')
+          eq(fired, 2)
+
+          e = []
+          eq(fired, 2)
+          not(fd.callAll(e))
+
+          var fn = function () {
+            is(this === o)
+            eqo(fd.toArray(arguments), [1, 2])
+          }
+
+          fd.callAll(fn, [1, 2], o)
+          fd.callAll([fn], [1, 2], o)
+        },
+
+        callAllOfObject: function () {
+          var o = { events: {event: [], evt: [fail]} }
+
+          fd.onObjectCall = function (event) {
+            eq(event, 'evt')
+            is(this === o)
+            eqo(fd.toArray(arguments, 1), [1, 2])
+            return 'ok'
+          };
+
+          eq(fd.callAllOfObject(o, 'evt', [1, 2]), 'ok')
+
+          var fn = fd.onObjectCall
+          fd.onObjectCall = null
+          o.events.any = [fn]
+          eq(fd.callAllOfObject(o, 'evt', [1, 2]), 'ok')
+
+          o.events.any = []
+          o.events.evt.unshift(function (a) { return 'o' + a })
+          eq(fd.callAllOfObject(o, 'evt', 'bj'), 'obj')
+        },
+
+        funcNS: function () {
+          var fn = new Function
+
+          eq(fd.funcNS(fn), '')
+          is(fd.funcNS(fn, 'Ns') === fn)
+          eq(fd.funcNS(fn), 'Ns')
+          is(fd.funcNS(fn, '') === fn)
+          eq(fd.funcNS(fn), '')
+        },
+
+        splitNS: function () {
+          eqo(fd.splitNS(''), ['', ''])
+          eqo(fd.splitNS(':'), ['', ''])
+          eqo(fd.splitNS(null), ['', ''])
+          eqo(fd.splitNS(undefined), ['', ''])
+
+          eqo(fd.splitNS('x:'), ['x', ''])
+          eqo(fd.splitNS('x'), ['x', ''])
+          eqo(fd.splitNS(':x'), ['', 'x'])
+          eqo(fd.splitNS('x:y'), ['x', 'y'])
+          eqo(fd.splitNS('x:y:z'), ['x', 'y:z'])
+        },
+
+        appendEventsToObject: function () {
+          var o = {events: {}}
+          var t = function () { return fd.appendEventsToObject.apply(o, arguments) }
+
+          eqor(t(), {})
+          eqor(t(['x']), {x: []})
+          eq(t( fd.funcNS(new Function, 'Ns') ), 'Ns')
+          eqor(t('x'), [])
+
+          eq(t('x', null), o)
+          eqor(o.events, {x: []})
+          eq(t(['x', 'y'], null), o)
+          eqor(o.events, {x: [], y: []})
+
+          var x1 = new Function
+          var x2 = new Function
+          var y1 = new Function
+
+          eq(t('x', x1), o)
+          eq(t(['x', 'y'], y1), o)
+          eqor(o.events, {x: [x1, y1], y: [y1]})
+
+          eq(t({x: x2}), o)
+          eqor(o.events, {x: [x1, y1, x2], y: [y1]})
+
+          eqor(t(), o.events)
+          eqor(t('x'), o.events.x)
+          eqor(t(['x']), {x: o.events.x})
+          eqor(t(['y', 'x']), o.events)
+
+          eq(t(['x', 'z'], null), o)
+          eqor(o.events, {x: [], y: [y1], z: []})
+        },
+
+        appendEventsToObjectNS: function () {
+          var o = {events: {}}
+          var t = function () { return fd.appendEventsToObject.apply(o, arguments) }
+
+          var fn = new Function
+          var f = new Function
+          var fz = new Function
+
+          t(['x:n', 'y:n'], fn)
+          t('x', f)
+          t('x:z', fz)
+          t('y:z', fz)
+
+          eq(t(fn), 'n')
+          eq(t(f), '')
+          eq(t(fz), 'z')
+          eq(t(new Function), '')
+
+          eqor(o.events, {x: [fn, f, fz], y: [fn, fz]})
+          eq(t(':n', null), o)
+          eqor(o.events, {x: [f, fz], y: [fz]})
+          eqor(t(), o.events)
+          eq(t('x:z', null), o)
+          eqor(o.events, {x: [f], y: [fz]})
+
+          eq(t([':'], null), o)
+          eqor(o.events, {x: [], y: []})
+        },
+
+        previewToObject: function () {
+          var o = {events: {}}
+          var t = function () { return fd.previewToObject.apply(o, arguments) }
+
+          var fn = new Function
+          var f = new Function
+
+          eq(fd.funcNS(fn), '')
+          eq(t('x:n', fn), o)
+          eq(fd.funcNS(fn), 'n')
+          eqor(o.events, {x: [fn]})
+
+          eq(t('x', f), o)
+          eqor(o.events, {x: [f, fn]})
+
+          eq(t(['x', 'y'], f), o)
+          eqor(o.events, {x: [f, f, fn], y: [f]})
+
+          eq(t({x: f, y: fn}), o)
+          eqor(o.events, {x: [f, f, f, fn], y: [fn, f]})
+        }
+      }
+
+      for (var key in tests) {
+        log(key + '...')
+        tests[key]()
+      }
+
+      log('<b>Done.</b>')
+      fd.byID('ua').textContent = navigator.userAgent
+      fd.setClass(document.body, 'ok')
+    </script>
+  </body>
+</html>

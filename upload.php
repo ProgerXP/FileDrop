@@ -1,7 +1,7 @@
 <?php
 /*!
-  FileDrop JavaScript classes | by Proger_XP | In public domain
-  http://proger.i-forge.net/FileDrop/7CC
+  FileDrop Revamped - server-side upload handler sample
+  in public domain  | http://filedropjs.org
 
  ***
 
@@ -13,6 +13,9 @@
   Result is either output as HTML with JavaScript code to invoke the callback
   (like JSONP) or in plain text if none is given (it's usually absent on AJAX).
 */
+
+// If an error causes output to be generated before headers are sent - catch it.
+ob_start();
 
 // Callback name is passed if upload happens via iframe, not AJAX (FileAPI).
 $callback = &$_REQUEST['fd-callback'];
