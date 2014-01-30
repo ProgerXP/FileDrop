@@ -8,7 +8,7 @@
     <link type="text/css" href="index.css" rel="stylesheet" media="all">
 
     <!--[if lt IE 9]>
-    <script src="http://ie7-js.googlecode.com/svn/version/2.1(beta4)/IE9.js"></script>
+    <script src="ie9.js"></script>
     <![endif]-->
   </head>
   <body>
@@ -69,6 +69,10 @@
             <u>XP SP2 x64:</u> 29.0
           </li>
           <li>
+            <b class="ie">Internet Explorer:</b>
+            <u>Win7 SP1:</u> 10
+          </li>
+          <li>
             <b class="opera">Opera:</b>
             <u>XP SP2 x64:</u> 12.16
           </li>
@@ -87,7 +91,7 @@
         <ul>
           <li>
             <b class="ie">Internet Explorer:</b>
-            <u>XP SP3:</u> 6
+            <u>XP SP3:</u> 6, 8
             <u>Win7 SP1:</u> 8
           </li>
           <li>
@@ -110,13 +114,16 @@
             <b class="ff">Firefox ~13</b> and later ignore <em>overflow: hidden</em> on <code>&lt;fieldset&gt;</code> &ndash; FileDrop will automatically wrap such drop zones into <code>&lt;div&gt;</code> with proper styles but make sure this doesn't affect your layout (for example, <em>margin</em> might show differently).
           </li>
           <li>
-            <b class="ie">IE 6</b> fires <b>ondrop</b> on <code>&lt;input type="file"&gt;</code> but when the form is submitted this way sends an empty POST body so drag &amp; drop is forcefully disabled for <b class="ie">IE 6-</b> (normal upload by clicking on the drop zone is still possible using <b>iframe</b> fallback). <b class="ie">IE 8</b> doesn't fire <b>ondrop</b> at all.
+            <b class="ie">IE 6-9</b> fire <b>ondrop</b> on <code>&lt;input type="file"&gt;</code> but when the form is submitted this way sends an empty POST body so drag &amp; drop is forcefully disabled for <b class="ie">IE 6</b> (normal upload by clicking on the drop zone is still possible using <b>iframe</b> fallback).
           </li>
           <li>
-            <b class="ie">IE</b> doesn't support multiple selection in file open dialog.
+            <b class="ie">IE 6-10</b> don't support multiple selection in file open dialog.
           </li>
           <li>
-            <b class="ie">IE 6-7</b> trigger upload when an object is dropped onto the zone but uploaded file is always empty. <em>Browse</em> dialog by click must be used instead.
+            <b class="ie">IE 10</b> lacks <code>readAsBinaryString()</code>. Unless you are calling it directly FileDrop will transparently translate it to <code>readAsArrayBuffer()</code>.
+          </li>
+          <li>
+            <b class="safari">Safari 5</b> provides drag & drop upload but no file reading functions.
           </li>
         </ul>
       </fieldset>

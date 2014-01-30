@@ -22,7 +22,7 @@
       <li>
         <b>Internet Explorer:</b>
         <u>XP SP3:</u> 6
-        <u>Win7 SP1:</u> 8
+        <u>Win7 SP1:</u> 8, 9, 10
       </li>
       <li>
         <b>Internet Explorer x64:</b>
@@ -60,7 +60,7 @@
       <iframe id="ifr" src="about:blank"></iframe>
     </div>
 
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="../filedrop.js"></script>
 
     <script type="text/javascript">
@@ -68,12 +68,18 @@
       var ie6 = fd.isIE6
       // IE 8 and below.
       var ie8 = false
+      // IE 9 and below.
+      var ie9 = false
+      // Any IE.
+      var ie = new Function("/*@cc_on return @_jscript_version; @*/")() !== undefined;
     </script>
 
-    <!--[if lte IE 8 ]>
-      <script type="text/javascript">
-        var ie8 = true
-      </script>
+    <!--[if lte IE 8]>
+      <script type="text/javascript">var ie8 = true</script>
+    <![endif]-->
+
+    <!--[if lte IE 9]>
+      <script type="text/javascript">var ie9 = true</script>
     <![endif]-->
 
     <script type="text/javascript">
@@ -258,10 +264,8 @@
             '  send                         unknown    object     function',
             '  abort                        unknown    object     function',
             '  setRequestHeader             unknown    object     function',
-            '  overrideMimeType             undefined  undefined  function',
             '  onreadystatechange           unknown    object     object',
-            '  readyState                   number     number     number',
-            '  status                       unknown    unknown    number'
+            '  readyState                   number     number     number'
           ]
 
           for (var i = 0; i < props.length; i++) {
@@ -269,6 +273,9 @@
             var type = ie6 ? parts[1] : (ie8 ? parts[2] : parts[3])
             eq(typeof xhr[parts[0]], type)
           }
+
+          // unknown = IE 9 and below; number = IE 10+ and W3C.
+          is(typeof xhr.status == 'unknown' || typeof xhr.status == 'number')
 
           loop(function () { is(fd.newXHR() !== xhr) })
         },
@@ -406,7 +413,7 @@
             active && fail()
           })
 
-          if (ie8) {
+          if (ie) {
             $('#idok')[0].click()
           } else {
             // Safari doesn't have click() on elements.
@@ -538,7 +545,7 @@
         toBinary: function () {
           // toBinary() is only used in conjunction with FileAPI which isn't
           // supported on IE 9 and before.
-          if (ie8) { return }
+          if (ie9) { return }
 
           var s = 'abc'
           var b = [s.charCodeAt(s[0]), s.charCodeAt(s[1]), s.charCodeAt(s[2])]
