@@ -662,8 +662,9 @@ window.fd = window.fd || {}
         // browsers (Firefox and Crhome-based) will handle this drop zone.
         url: '',
 
-        // Name of global window callback function to be called by the server
-        // in the generated page after uploading a file via <iframe>.
+        // Name of the GET input variable containing the name of the global
+        // window callback function to be called by the server in the generated
+        // page after uploading a file via <iframe>.
         callbackParam: 'fd-callback',
 
         // Name of POST file input variable (<input type="file" name="$nameParam">).
