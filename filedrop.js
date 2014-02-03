@@ -1919,19 +1919,19 @@ window.fd = window.fd || {}
     // abort it (unless it's finished) and start anew.
     //
     //? sendTo('http://my.host/upload.php?var=foo&var2=123')
-    self.sendTo = function (url) {
+    self.sendTo = function (url, options) {
       if (window.FileReader) {
         // Using Firefox FileAPI.
         var reader = new FileReader
 
-        reader.onload = function (e) { self.sendDataReadyTo(url, e) }
+        reader.onload = function (e) { self.sendDataReadyTo(url, e, options) }
         reader.onerror = function (e) { global.callAllOfObject(self, 'error', [e]) }
 
         var func = reader.readAsBinaryString ? 'readAsBinaryString' : 'readAsArrayBuffer'
         reader[func](self.nativeFile)
       } else {
         // Using Chrome/Safari file API.
-        self.sendDataReadyTo(url)
+        self.sendDataReadyTo(url, undefined, options)
       }
 
       return self
@@ -1941,13 +1941,13 @@ window.fd = window.fd || {}
     // upload. For FileAPI (Firefox) gets called on readAsBinaryString() or
     // readAsArrayBuffer() onload event; for Safari/early Chrome it's called
     // immediately and gets passed the native file object itself.
-    self.sendDataReadyTo = function (url, e) {
+    self.sendDataReadyTo = function (url, e, options) {
       self.abort()
 
       self.xhr = global.newXHR()
       self.hookXHR(self.xhr)
 
-      self.xhr.open('POST', url, true)
+      self.xhr.open((options && options.method) || 'POST', url, true)
       // Missing in IE.
       self.xhr.overrideMimeType && self.xhr.overrideMimeType('application/octet-stream')
       self.xhr.setRequestHeader('Content-Type', 'application/octet-stream')
