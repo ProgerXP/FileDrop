@@ -289,11 +289,12 @@ window.fd = window.fd || {}
   //  extend(child, {x: 1}) === child   //=> true (same object)
   //  console.dir(child)    //=> {y: 1, x: 1}
   global.extend = function (child, base, overwrite) {
-    if (child && base) {
-      for (var prop in base) {
-        if (overwrite || typeof child[prop] == 'undefined') {
-          child[prop] = base[prop]
-        }
+    child = child || {}
+    base = base || {}
+
+    for (var prop in base) {
+      if (overwrite || typeof child[prop] == 'undefined') {
+        child[prop] = base[prop]
       }
     }
 
@@ -662,8 +663,8 @@ window.fd = window.fd || {}
         // browsers (Firefox and Crhome-based) will handle this drop zone.
         url: '',
 
-        // Name of the GET input variable containing the name of the global
-        // window callback function to be called by the server in the generated
+        // Name of GET input variable containing the name of the global window
+        // callback function to be called by the server in the generated
         // page after uploading a file via <iframe>.
         callbackParam: 'fd-callback',
 
@@ -1827,12 +1828,22 @@ window.fd = window.fd || {}
 
     /***
       File Options
+     ***
+
+      Values here specify default values for sendTo() options - like HTTP
+      method used to submit the data. They can be overriden by passing an
+      object to sendTo() - e.g. sendTo('upload.php', {method: 'PUT'}).
      ***/
 
     self.opt = {
       // If enabled this object will add several X-... headers to provide
       // information about the original file to the server (e.g. name and size).
-      extraHeaders: true
+      extraHeaders: true,
+
+      // HTTP method used to submit the upload data. Useful for contacting
+      // WebDAV services which might accept PUT or DELETE. Given in sendTo()
+      // to XMLHttpRequest.open().
+      method: 'POST'
     }
 
     /***
@@ -1847,22 +1858,25 @@ window.fd = window.fd || {}
       // Object-wise event preview handlers. See DropHandle's 'any' description.
       any: [],
 
-      // Occurs after a XMLHttpRequest object was prepared to submit the file
+      // Occurs after an XMLHttpRequest object was prepared to submit the file
       // to the server. All FileDrop-specific headers and other customization
       // (Content-Type, etc.) was already done. You can set extra headers or add
       // event listeners here before it's dispatched to the server.
       //
-      // function (XMLHttpRequest)
+      // function (XMLHttpRequest, opt)
+      //    - is passed the request object and the options object that was
+      //      passed to sendTo() with missing fields populated as this.opt.
       xhrSetup: [],
 
       // Occurs when a file and XMLHttpRequest were prepared for upload and need
       // to be sent. It's handled by fd.File.xhrSend() but you might want to
       // add your logic here.
       //
-      // function (XMLHttpRequest, data)
-      //    - is passed the request object and raw file data that is
+      // function (XMLHttpRequest, data, opt)
+      //    - is passed the request object, options and raw file data that is
       //      browser-specific (it might not be raw binary stream in some
-      //      older browsers as it is in Firefox and Chrome-based).
+      //      older browsers as it is in Firefox and Chrome-based). opt is the
+      //      object passed to sendTo() with missing fields populated as this.opt.
       xhrSend: [],
 
       // Occurs during file upload with information on current upload progress.
@@ -1913,25 +1927,30 @@ window.fd = window.fd || {}
       return self
     }
 
-    // Submits the dropped file to the server script at given URL.
+    // Submits the dropped file to the server script at given URL and with
+    // optional options (fields default to this fd.File.opt).
     // Incapsulates browser-specific logic behind reading a local file.
-    // If an upload request has ben already made on this fd.File instance will
+    // If an upload request has been already made on this fd.File instance will
     // abort it (unless it's finished) and start anew.
     //
     //? sendTo('http://my.host/upload.php?var=foo&var2=123')
-    self.sendTo = function (url) {
+    //? sendTo('upload.php', {method: 'PUT'})
+    self.sendTo = function (url, opt) {
+      opt = global.extend(opt, self.opt)
+      opt.url = url
+
       if (window.FileReader) {
         // Using Firefox FileAPI.
         var reader = new FileReader
 
-        reader.onload = function (e) { self.sendDataReadyTo(url, e) }
+        reader.onload = function (e) { self.sendDataReadyTo(opt, e) }
         reader.onerror = function (e) { global.callAllOfObject(self, 'error', [e]) }
 
         var func = reader.readAsBinaryString ? 'readAsBinaryString' : 'readAsArrayBuffer'
         reader[func](self.nativeFile)
       } else {
-        // Using Chrome/Safari file API.
-        self.sendDataReadyTo(url)
+        // Using early Chrome/Safari File API.
+        self.sendDataReadyTo(opt)
       }
 
       return self
@@ -1941,18 +1960,18 @@ window.fd = window.fd || {}
     // upload. For FileAPI (Firefox) gets called on readAsBinaryString() or
     // readAsArrayBuffer() onload event; for Safari/early Chrome it's called
     // immediately and gets passed the native file object itself.
-    self.sendDataReadyTo = function (url, e) {
+    self.sendDataReadyTo = function (opt, e) {
       self.abort()
 
       self.xhr = global.newXHR()
       self.hookXHR(self.xhr)
 
-      self.xhr.open('POST', url, true)
+      self.xhr.open(opt.method, opt.url, true)
       // Missing in IE.
       self.xhr.overrideMimeType && self.xhr.overrideMimeType('application/octet-stream')
       self.xhr.setRequestHeader('Content-Type', 'application/octet-stream')
 
-      if (self.opt.extraHeaders) {
+      if (opt.extraHeaders) {
         self.xhr.setRequestHeader('X-File-Name', encodeURIComponent(self.name))
         self.xhr.setRequestHeader('X-File-Size', self.size)
 
@@ -1960,13 +1979,13 @@ window.fd = window.fd || {}
         self.xhr.setRequestHeader('X-Requested-With', 'FileDrop-XHR-' + api)
       }
 
-      global.callAllOfObject(self, 'xhrSetup', [self.xhr])
+      global.callAllOfObject(self, 'xhrSetup', [self.xhr, opt])
 
       // Some browsers allow reading raw data, some don't. See if ours allows
       // and if not then it should support just passing the native file object
       // to XMLHttpRequest.send().
       var data = (e && e.target && e.target.result) ? e.target.result : self.nativeFile
-      global.callAllOfObject(self, 'xhrSend', [self.xhr, data])
+      global.callAllOfObject(self, 'xhrSend', [self.xhr, data, opt])
       return self.xhr
     }
 

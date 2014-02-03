@@ -540,6 +540,9 @@
           var o = {}
           is(fd.extend(o, {x: 1}) === o)
           eqo(o, {x: 1})
+
+          eqo(fd.extend(null, {a: 1}), {a: 1})
+          eqo(fd.extend({a: 1}, null), {a: 1})
         },
 
         toBinary: function () {
