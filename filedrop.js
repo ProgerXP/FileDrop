@@ -1900,6 +1900,8 @@ window.fd = window.fd || {}
       done: [],
 
       // Occurs when a file has failed during upload much like regular XHR error.
+      // Note that "failing" means all response code except for 200 - even 2xx like
+      // 202 Accepted (WebDAV and such) or 3xx (redirects).
       // This isn't called when upload was aborted - if you specifically need to
       // track this call fd.addEvent(fileObject, 'abort', function ...).
       //
