@@ -1475,7 +1475,10 @@ window.fd = window.fd || {}
       if (e.dataTransfer && (e.dataTransfer.length || e.dataTransfer.files)) {
         var list = e.dataTransfer
       } else {
-        var list = e.target && e.target.files
+        // IE 10 provides dataTransfer on drag & drop but when selecting with
+        // Open File dialog of <input type="file"> it only has e.srcElement.files.
+        // Thanks to @rafaelmaiolla for this correction.
+        var list = (e.target && e.target.files) || (e.srcElement && e.srcElement.files)
       }
 
       if (list) {
