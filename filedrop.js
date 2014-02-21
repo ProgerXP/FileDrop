@@ -1475,7 +1475,7 @@ window.fd = window.fd || {}
       if (e.dataTransfer && (e.dataTransfer.length || e.dataTransfer.files)) {
         var list = e.dataTransfer
       } else {
-        var list = e.target && e.target.files
+        var list = e.target && e.target.files || e.srcElement && e.srcElement.files
       }
 
       if (list) {
