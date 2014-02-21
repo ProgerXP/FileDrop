@@ -1143,9 +1143,17 @@ window.fd = window.fd || {}
         form.setAttribute('action', url)
         global.callAllOfObject(self, 'iframeSetup', form)
         form.submit()
+        setTimeout(self.resetForm, 300)
 
         return true
       }
+    }
+
+    // Clear value of the file input so that the same file (with the same
+    // local path) can be uploaded again without reloading the page. Works on
+    // Firefox/Chrome when using Open File dialog. Thanks to @rafaelmaiolla.
+    self.resetForm = function () {
+      self.opt.input && self.opt.input.file && (self.opt.input.file.value = '')
     }
 
     // Toggles selection of multiple files in the browser's open file dialog
@@ -1453,7 +1461,7 @@ window.fd = window.fd || {}
       // if <iframe> upload was enabled by filling out opt.iframe.url).
       if (!files) {
         if (!self.handle.sendViaIFrame() && global.hasConsole) {
-          // Must configure opt.iframe.url for <iframe> fallback.
+          // Must set opt.iframe.url if <iframe> fallback needs to work.
           console.warn('FileDrop fallback upload triggered but iframe options' +
                        ' were not configured - doing nothing.')
         }
@@ -1524,6 +1532,7 @@ window.fd = window.fd || {}
 
     self.event({
       upload:           self.onUpload,
+      send:             self.resetForm,
       // Add/remove on-drag HTML classes to/from the zone element.
       dragEnter:        dragClassChanger(true),
       dragLeave:        dragClassChanger(false),
