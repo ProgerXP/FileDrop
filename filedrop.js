@@ -701,6 +701,18 @@ window.fd = window.fd || {}
         //form: null
       //},
 
+      // If using <input type="file"> (legacy <iframe> upload, see input option)
+      // some browsers including IE 6-10 and Opera will keep last selected file
+      // in the input after upload which will prevent the user from uploading
+      // the same file twice in a row (this doesn't apply to drag & drop uploads).
+      // When enabled, this option will let FileDrop recreate the file input
+      // thus resetting file selection. This is safe in most cases but if your
+      // project does some extra customization on opt.input.file this might erase
+      // them and attached events unless you are doing that in inputSetup event.
+      // When disabled, input will be cleared in Firefox/Chrome thus preventing
+      // user from reuploading the same file one after another in other browsers.
+      recreateInput: true,
+
       // Chrome, unlike Firefox, dispatches drop events for the entire document
       // rather than the input element. For Chrome this option is always true.
       // If you want the same behaviout in Firefox then you can manually set
@@ -814,8 +826,10 @@ window.fd = window.fd || {}
       // Occurs after <input type="file"> used to accept file drops was created
       // or found (see the description of the 'input' option). Here it's used to
       // assign it some HTML classes. You can do similar setup.
+      // Is also fired after recreating file input on upload if opt.recreateInput
+      // is set - in this case passes old <input type="file"> (that was cloned).
       //
-      // function ({ file: DOM_Input, form: DOM_Form })
+      // function ({ file: DOM_Input, form: DOM_Form }, oldFileInput)
       //    - is passed an object with the same keys as 'input' option -
       //      the DOM element of the <input type="file"> and its parent
       //      <form> DOM element.
@@ -916,13 +930,6 @@ window.fd = window.fd || {}
       // Firefox and Chrome-based browsers are the only ones supporting this
       // event which we use to read dropped file data in the FileDrop class.
       global.isIE9 || self.delegate(zoneNode, 'drop', 'upload')
-
-      // For all but drag & drop-aware browsers (Firefox and Chrome-based)
-      // we listen for <input type="file">'s onchange event - when it occurs
-      // we trigger submission of the hidden form which navigates hidden
-      // <iframe> to upload the file to the server script and read its response.
-      // For more details see the 'iframe' option.
-      self.opt.input && self.delegate(self.opt.input.file, 'change', 'upload')
     }
 
     // Listens for DOM events and initiates corresponding DropHandle's events.
@@ -1150,10 +1157,22 @@ window.fd = window.fd || {}
     }
 
     // Clear value of the file input so that the same file (with the same
-    // local path) can be uploaded again without reloading the page. Works on
-    // Firefox/Chrome when using Open File dialog. Thanks to @rafaelmaiolla.
+    // local path) can be uploaded again without reloading the page.
+    // Thanks to @rafaelmaiolla for the tips.
     self.resetForm = function () {
-      self.opt.input && self.opt.input.file && (self.opt.input.file.value = '')
+      var input = self.opt.input && self.opt.input.file
+      if (input) {
+        // Works in Firefox/Chrome only. Funny fact is that cloneNode() there
+        // will clone file selection too. IE doesn't support value = '' but
+        // node cloning erases it.
+        input.value = ''
+
+        if (self.opt.recreateInput) {
+          var clone = self.opt.input.file = input.cloneNode(true)
+          input.parentNode.replaceChild(clone, input)
+          global.callAllOfObject(self, 'inputSetup', [self.opt.input, input])
+        }
+      }
     }
 
     // Toggles selection of multiple files in the browser's open file dialog
@@ -1296,9 +1315,26 @@ window.fd = window.fd || {}
       classes to zone and input nodes.
      ***/
 
-    self.onInputSetup = function (input) {
+    self.onInputSetup = function (input, oldInput) {
+      if (oldInput) {
+        // IE clones elements "by reference" so when one's attributes or
+        // events are changed the other also reflects the change.
+        // Taken from jQuery which borrowed that from MooTools.
+        input.file.clearAttributes && input.file.clearAttributes()
+        input.file.mergeAttributes && input.file.mergeAttributes(oldInput)
+      } else {
+        self.multiple(self.opt.multiple)
+      }
+
       global.setClass(input.file, self.opt.inputClass)
-      self.multiple(self.opt.multiple)
+
+      // We listen for <input type="file">'s onchange event - when it occurs
+      // we trigger submission of the hidden form which navigates hidden
+      // <iframe> to upload the file to the server script and read its response.
+      // This can be used in drag & drop-aware browsers (Firefox and Chrome-based)
+      // to create a "Browse for file" button as an alternative to drag & drop.
+      // For more details see the 'iframe' option.
+      self.delegate(input.file, 'change', 'upload')
 
       var parent = input.file.parentNode
       if (parent && parent.style.display.match(/^(static)?$/)) {
