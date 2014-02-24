@@ -41,7 +41,7 @@
         <ul>
           <li><b>No JS dependencies</b>, Flash or Java applets</li>
           <li>900 lines of code, 1300 lines of comments</li>
-          <li><b>17 KiB minified</b>, 6 KiB gzipped</li>
+          <li><b>18 KiB minified</b>, 6 KiB gzipped</li>
           <li><b>HTML5, drag &amp; drop</b> for modern browsers</li>
           <li><b>IFrame fallback</b> for legacy agents (IE 6+)</li>
           <li>Flexible <b>event system</b> with over 15 callbacks</li>
@@ -137,6 +137,7 @@
           <li><a href="#progress">Progress bar</a></li>
           <li><a href="#thumbs">Thumbnails</a></li>
           <li><a href="#text">Read text files</a></li>
+          <li><a href="#dir">Read folders</a></li>
           <li><a href="http://filedropjs.org/#samples">More samples</a></li>
         </ul>
       </nav>
@@ -347,7 +348,71 @@
                 },
                 function () { alert('Problem reading this file.'); },
                 'text'
-              )
+              );
+            });
+          });
+        </script>
+      </article>
+
+      <article id="dir">
+        <h3>Read folders</h3>
+
+        <p><b>Supported only in Chrome 21+.</b> W3C has a <a href="http://www.w3.org/TR/file-system-api/#the-entry-interface" target="_blank">working draft</a> on File System API that introduces lots of interesting features allowing us to read and write files and directories. This sample will non-recursively list all files and folders, also displaying thumbnails of images it finds.
+
+        <div id="zdir">
+          <p>Drop a directory here…</p>
+        </div>
+
+        <script type="sample/javascript">
+          var zone = new FileDrop('zdir', {input: false});
+
+          zone.event('upload', function (e) {
+            while (cleared = zone.el.firstChild) {
+              zone.el.removeChild(zone.el.firstChild);
+            }
+
+            var error = function () { alert('Problem reading the file system.'); }
+
+            var done = function (files) {
+              // files is standard FileDrop's FileList object.
+              files.each(function (file) {
+                // file is FileDrop.File with native objects accessible
+                // as file.nativeFile and file.nativeEntry.
+                var node = document.createElement('p');
+                node.innerText = file.name
+
+                if (file.nativeFile) {
+                  // This is a file. We can use any FileDrop method here
+                  // like sendTo() and readData() - see below.
+                  node.innerText += ' (' + file.size + ')';
+                } else {
+                  // This is a directory - it has no File API object.
+                  node.innerHTML = '<b>' + node.innerHTML + '/</b>';
+                }
+
+                zone.el.appendChild(node);
+              });
+
+              // Let's show thumbs of images using FileDrop.File methods.
+              files.images().each(function (file) {
+                file.readDataURI(function (uri) {
+                  var img = new Image;
+                  img.src = uri;
+                  zone.el.appendChild(img);
+                });
+              });
+            };
+
+            zone.eventFiles(e).each(function (root) {
+              if (root.listEntries(done, error)) {
+                // Success.
+              } else if (!root.nativeEntry) {
+                zone.el.innerHTML = '<p><b>File System API is not' +
+                                    ' supported by this browser.</b></p>';
+              } else {
+                zone.el.innerHTML = '<p><b>Problem listing ' +
+                                    root.name + '.</b></p>';
+              }
             });
           });
         </script>
