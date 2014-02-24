@@ -827,7 +827,7 @@ window.fd = window.fd || {}
       // or found (see the description of the 'input' option). Here it's used to
       // assign it some HTML classes. You can do similar setup.
       // Is also fired after recreating file input on upload if opt.recreateInput
-      // is set - in this case passes old <input type="file"> (that was cloned).
+      // is set - in this case is passed old <input type="file"> (that was cloned).
       //
       // function ({ file: DOM_Input, form: DOM_Form }, oldFileInput)
       //    - is passed an object with the same keys as 'input' option -
@@ -1156,7 +1156,7 @@ window.fd = window.fd || {}
       }
     }
 
-    // Clear value of the file input so that the same file (with the same
+    // Clears value of the file input so that the same file (with the same
     // local path) can be uploaded again without reloading the page.
     // Thanks to @rafaelmaiolla for the tips.
     self.resetForm = function () {
@@ -1514,6 +1514,7 @@ window.fd = window.fd || {}
     // otherwise returns false in such occurrences instead of empty FileList.
     self.eventFiles = function (e, orFalse) {
       var result = new global.FileList(e)
+
       // IE 8 supplies dataTransfer but it's of its own format (getData(), etc.)
       // and not standardized. Has no file objects.
       if (e.dataTransfer && (e.dataTransfer.length || e.dataTransfer.files)) {
@@ -1526,6 +1527,7 @@ window.fd = window.fd || {}
       }
 
       if (list) {
+        var entries = list.items || []
         list.files && (list = list.files)   // Firefox 3.6.
         var names = {}
 
@@ -1535,8 +1537,14 @@ window.fd = window.fd || {}
           // Safari Windows adds first file several times so skip them.
           if (!names[file.name]) {
             names[file.name] = true
+            file.setNativeEntry(entries[i])
             global.callAllOfObject(self, 'fileSetup', file)
-            file.size > 0 && result.push(file)
+
+            // Directories have zero size but in Chrome they are useful
+            // since you can access underlying DIrectoryEntry and read files.
+            if (file.size > 0 || file.nativeEntry) {
+              result.push(file)
+            }
           }
         }
       } else if (orFalse) {
@@ -1856,7 +1864,12 @@ window.fd = window.fd || {}
     var self = this
 
     // Native browser's File object as it was given in the on-drop event.
+    // Is null for directory entries if on lists produced by listEntries().
     self.nativeFile = file
+
+    // In Chrome 21+ will be set to native Entry (FileEntry, DirectoryEntry, etc.)
+    // instance. See W3C spec: http://www.w3.org/TR/file-system-api/#the-entry-interface
+    self.nativeEntry = null
 
     // Local file name.
     self.name = file.fileName || file.name || ''
@@ -1989,7 +2002,10 @@ window.fd = window.fd || {}
       opt = global.extend(opt, self.opt)
       opt.url = url
 
-      if (window.FileReader) {
+      if (!self.size) {
+        // Zero size also indicates that it might be a directory.
+        global.hasConsole && console.warn('Trying to send an empty FileDrop.File.')
+      } else if (window.FileReader) {
         // Using Firefox FileAPI.
         var reader = new FileReader
 
@@ -2245,6 +2261,90 @@ window.fd = window.fd || {}
       }
     }
 
+    // Uses W3C draft File System API to traverse this DirectoryEntry.
+    // Currently supported in Chrome 21+. Spec: http://www.w3.org/TR/file-system-api/
+    // Thanks to @kevinkrouse for pointing me to this wonderful interface.
+    // This function is not recursive.
+    //
+    // onDone is a function callback that receives FileDrop.FileList object.
+    // Each entry there can be either a file or a directory. Files have nativeFile
+    // set (but not in case of error - if so use nativeEntry's isDirectory and
+    // isFile props to determine which one is which). On these, correct files you
+    // can use any of FileDrop methods - sendTo(), readFile(), etc. On directories
+    // (but not failed files) you can use listEntries() to traverse them further.
+    //
+    // onError is an optional function called by the browser when it runs into errors.
+    // It gets passed error object. Note that it might be called multiple times
+    // and that onDone can be still called (this might happen if FileEntry can't
+    // read particular File object when using file()).
+    //
+    //? listEntries(function (files) { files.images().invoke('sendTo', 'upload.php') })
+    //      // sends all images in the dropped directory to upload.php; errors are
+    //      // ignored but if one has occurred while retrieving File API object this
+    //      // call with fail with a JavaScript error - this is fixed by removing
+    //      // all entries with null nativeFile before doing sendTo().
+    //
+    //? listEntries(function (files) { files.each(...) },
+    //              function (e) { alert('File System API error ' + e.code) })
+    self.listEntries = function (onDone, onError) {
+      if (self.nativeEntry && self.nativeEntry.isDirectory) {
+        onError = onError || new Function
+        var reader = self.nativeEntry.createReader()
+        var files = new global.FileList
+        var enqueued = 0
+
+        function dequeue(count) {
+          enqueued -= count
+          if (enqueued == 0 && onDone) {
+            onDone(files)
+            onDone = null
+          }
+        }
+
+        reader.readEntries(function (list) {
+          for (var i = 0; i < list.length; i++) {
+            var nativeEntry = list[i]
+
+            if (nativeEntry.file) {
+              // This entry is a file (FileEntry).
+              enqueued++
+              nativeEntry.file(
+                function (nativeFile) {
+                  var file = new global.File(nativeFile)
+                  file.setNativeEntry(nativeEntry)
+                  files.push(file)
+                  dequeue(1)
+                },
+                function () {
+                  // Error getting a File object. Let's still insert it
+                  // into the resulting list but without nativeFile (which
+                  // makes sendTo(), readData(), etc. unavailable).
+                  files.push( global.File.fromEntry(nativeEntry) )
+                  dequeue(1)
+                  onError.apply(this, arguments)
+                }
+              )
+            } else {
+              // This is a DirectoryEntry. It has no File object (that comes
+              // from File API spec: http://dev.w3.org/2006/webapi/FileAPI/).
+              // Don't try calling sendTo(), readFile() and the likes on the
+              // FileDrop.File items returned in the FileList passed to onDone.
+              files.push( global.File.fromEntry(nativeEntry) )
+            }
+          }
+
+          i ? reader.readEntries(arguments.callee, onError) : dequeue(0)
+        }, onError)
+
+        return true
+      }
+    }
+
+    // Internal method to assign data from a native Entry object.
+    self.setNativeEntry = function (item) {
+      self.nativeEntry = item && item.webkitGetAsEntry && item.webkitGetAsEntry()
+    }
+
     // Adds event listeners to this object. See DropHandle.event() for
     // extended comment and examples.
     self.event = function (events, funcs) {
@@ -2283,6 +2383,21 @@ window.fd = window.fd || {}
     self.event({
       xhrSend:        self.onXhrSend
     })
+  }
+
+  // Static method of File that creates an object without attaching to any
+  // File API's File object. It's only useful if you have an Entry object
+  // that lets you get at least some of the info (e.g. file name) and list
+  // contents for DirectoryEntry. See listEntries(). Using sendTo(), readData()
+  // and others on such an instance will result in errors.
+  //
+  //? fromEntry( e.dataTransfer.items[0].webkitGetAsEntry() )
+  //      //=> FileDrop.File
+  global.File.fromEntry = function (nativeEntry) {
+    var file = new global.File(nativeEntry)
+    file.setNativeEntry(nativeEntry)
+    file.nativeFile = null
+    return file
   }
 
   /***
