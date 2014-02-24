@@ -154,4 +154,20 @@
 
     allFiles.abort()
   }
+
+  ;(fd.byID('report') || {}).onclick = function () {
+    var ua = navigator.userAgent
+    var msg = prompt('Have any comment? The following user-agent string will be sent along:\n' + ua, '-');
+
+    if (typeof msg == 'string') {
+      var script = document.createElement('script')
+      script.type = 'text/javascript'
+      script.src = this.href.replace(/\/+$/, '') +
+                   '/report.php?jsonp=1&msg=' + encodeURIComponent('[BROKEN] ' + msg)
+      var first = document.getElementsByTagName('script')[0]
+      first.parentNode.insertBefore(script, first)
+    }
+
+    return false
+  }
 })(window.fd)
