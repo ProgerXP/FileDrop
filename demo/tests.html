@@ -545,21 +545,7 @@
           eqo(fd.extend({a: 1}, null), {a: 1})
         },
 
-        toBinary: function () {
-          // toBinary() is only used in conjunction with FileAPI which isn't
-          // supported on IE 9 and before.
-          if (ie9) { return }
-
-          var s = 'abc'
-          var b = [s.charCodeAt(s[0]), s.charCodeAt(s[1]), s.charCodeAt(s[2])]
-
-          eq(fd.toBinary(s).byteLength, b.length)
-          // ['a', 'b', 'c']
-          eq(fd.toBinary( s.split(new RegExp('', 'g')) ).byteLength, b.length)
-        },
-
         callAll: function () {
-
           var o = {}
           var fired = 0
           var e = [function () { fired++ }, function (a) { return 'br' + a }, fail]
