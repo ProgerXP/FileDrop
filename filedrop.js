@@ -2012,9 +2012,9 @@ window.fd = window.fd || {}
 
       if (opt.extraHeaders) {
         self.xhr.setRequestHeader('X-File-Name', encodeURIComponent(self.name))
-        self.xhr.setRequestHeader('X-File-Size', encodeURIComponent(self.size))
-        self.xhr.setRequestHeader('X-File-Type', encodeURIComponent(self.size))
-        self.xhr.setRequestHeader('X-File-Date', encodeURIComponent(self.modDate.toGMTString()))
+        self.xhr.setRequestHeader('X-File-Size', self.size)
+        self.xhr.setRequestHeader('X-File-Type', self.type)
+        self.xhr.setRequestHeader('X-File-Date', self.modDate.toGMTString())
 
         var api = window.FileReader ? 'FileAPI' : 'Webkit'
         self.xhr.setRequestHeader('X-Requested-With', 'FileDrop-XHR-' + api)
