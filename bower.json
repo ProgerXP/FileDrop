@@ -6,5 +6,6 @@
   "keywords": ["filedrop", "ajax", "file", "upload", "drag", "drop"],
   "authors": ["Proger_XP <proger.xp@gmail.com> (http://proger.me)"],
   "license": "public domain",
-  "homepage": "http://filedropjs.org"
+  "homepage": "http://filedropjs.org",
+  "ignore": []
 }
