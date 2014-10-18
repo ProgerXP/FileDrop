@@ -9,10 +9,13 @@
 .fd-zone {
   position: relative;
   overflow: hidden;
-  /* The following are not required but create a pretty box: */
-  width: 15em;
-  margin: 0 auto;
-  text-align: center;
+  /***
+    This way you can create a pretty box that will be both clickable and droppable:
+   ***
+    width: 15em;
+    margin: 0 auto;
+    text-align: center;
+  */
 }
 
 /* Hides <input type="file"> while simulating "Browse" button: */
@@ -30,5 +33,8 @@
   font-family: sans-serif;
 }
 
-/* This way you can provides feedback when user drags a file over the drop zone: */
-/*.fd-zone.over { border-color: maroon; background: #eee; }*/
+/***
+  With .over you can provide feedback when user drags a file over the drop zone:
+ ***
+  .fd-zone.over { border-color: maroon; background: #eee; }
+*/
