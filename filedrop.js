@@ -1876,6 +1876,13 @@ window.fd = window.fd || {}
       // information about the original file to the server (e.g. name and size).
       extraHeaders: true,
 
+      // The value of X-Requested-With header sent with XMLHttpRequest used
+      // to upload the dropped file(s). If false then this header is not set
+      // (but you can use xhrSetup/xhrSend events to set it). If true - it's
+      // set to one of 'FileDrop-XHR-...'. A string sets it to that string -
+      // e.g. 'XMLHttpRequest' would simulate regular $.ajax() request.
+      xRequestedWith: true,
+
       // HTTP method used to submit the upload data. Useful for contacting
       // WebDAV services which might accept PUT or DELETE. Given in sendTo()
       // to XMLHttpRequest.open().
@@ -2016,8 +2023,13 @@ window.fd = window.fd || {}
         self.xhr.setRequestHeader('X-File-Type', self.type)
         self.xhr.setRequestHeader('X-File-Date', self.modDate.toGMTString())
 
-        var api = window.FileReader ? 'FileAPI' : 'Webkit'
-        self.xhr.setRequestHeader('X-Requested-With', 'FileDrop-XHR-' + api)
+        var reqWith = opt.xRequestedWith
+        if (reqWith === true) {
+          var api = window.FileReader ? 'FileAPI' : 'Webkit'
+          reqWith = 'FileDrop-XHR-' + api
+        }
+
+        reqWith && self.xhr.setRequestHeader('X-Requested-With', reqWith)
       }
 
       global.callAllOfObject(self, 'xhrSetup', [self.xhr, opt])
