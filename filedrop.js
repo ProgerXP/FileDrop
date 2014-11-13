@@ -1510,7 +1510,8 @@ window.fd = window.fd || {}
           var file = new global.File(list[i])
 
           // Safari Windows adds first file several times so skip them.
-          if (!names[file.name]) {
+          // ...while iOS Safari adds files under the same name - image.jpg (#30).
+          if (!names[file.name] || file.name == 'image.jpg') {
             names[file.name] = true
             file.setNativeEntry(entries[i])
             global.callAllOfObject(self, 'fileSetup', file)
