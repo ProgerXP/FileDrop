@@ -7,8 +7,13 @@
   Fork & report problems at https://github.com/ProgerXP/FileDrop
 */
 
-window.fd = window.fd || {}
-;(function (global, exports) {
+;(function (root, init) {
+  if (typeof exports !== 'undefined') {
+    init(root, exports)
+  } else {
+    init(root, root.fd = root.fd || {})
+  }
+})(this, function (root, global) {
   /***
     Global Utility Functions
    ***/
@@ -2506,8 +2511,5 @@ window.fd = window.fd || {}
   }
 
   // Alias window.fd.FileDrop class to just window.FileDrop since it's most used.
-  exports.FileDrop = global.FileDrop
-})(window.fd, window)
-
-// Prevent concatenation with other scripts from triggering a function call from braces.
-;
+  root.FileDrop = global.FileDrop
+});
