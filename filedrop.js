@@ -8,7 +8,9 @@
 */
 
 ;(function (root, init) {
-  if (typeof exports !== 'undefined') {
+  if (typeof define == 'function' && define.amd) {
+    define(['exports'], function (exports) { init(root, exports) })
+  } else if (typeof exports !== 'undefined') {
     init(root, exports)
   } else {
     init(root, root.fd = root.fd || {})
