@@ -695,11 +695,15 @@
       // user from reuploading the same file one after another in other browsers.
       recreateInput: true,
 
-      // Chrome, unlike Firefox, dispatches drop events for the entire document
+      // Chrome, unlike Firefox, dispatches drag events for the entire document
       // rather than the input element. For Chrome this option is always true.
       // If you want the same behaviout in Firefox then you can manually set
-      // it to true to let all of your drop zones receive drop events as soon
-      // as they enter the browser's window but not those zones' bounds.
+      // it to true to let all of your drop zones receive drag events as soon
+      // as they enter the browser's window but not those zones' boundaries.
+      // Note that drop events (when user releases the mouse button) are always
+      // dispatched to drop zone under the mouse pointer, if there's any.
+      // This only makes drag (hover) events fire for all zones regardless of
+      // the pointer position.
       fullDocDragDetect: false,
 
       // Initial state of the multiple selection in browser's Open File dialog
