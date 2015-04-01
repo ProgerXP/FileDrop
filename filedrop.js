@@ -2028,6 +2028,12 @@
       // Missing in IE.
       self.xhr.overrideMimeType && self.xhr.overrideMimeType('application/octet-stream')
       self.xhr.setRequestHeader('Content-Type', 'application/octet-stream')
+      
+      if (global.isArray(opt.customHeaders)) {
+        for (var i = 0; i < opt.customHeaders.length; i++) {
+      	  self.xhr.setRequestHeader(opt.customHeaders[i].name, opt.customHeaders[i].value)
+        }
+      }
 
       if (opt.extraHeaders) {
         self.xhr.setRequestHeader('X-File-Name', encodeURIComponent(self.name))
