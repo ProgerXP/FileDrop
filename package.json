@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git@github.com:ProgerXP/FileDrop.git"
   },
+  "scripts": {
+    "dist":"uglifyjs --compress --mangle --support-ie8 -o filedrop-min.js -- filedrop.js"
+  },
   "bugs": {
     "url": "https://github.com/ProgerXP/FileDrop/issues"
   },
@@ -22,7 +25,15 @@
     "demo"
   ],
   "keywords": [
-    "filedrop", "ajax", "file", "upload", "drag", "drop"
+    "filedrop",
+    "ajax",
+    "file",
+    "upload",
+    "drag",
+    "drop"
   ],
-  "license": "Unlicense"
+  "license": "Unlicense",
+  "devDependencies": {
+    "uglify-js": "^2.7.5"
+  }
 }

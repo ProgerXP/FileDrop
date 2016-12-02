@@ -18,6 +18,14 @@
 * Ready for **jQuery**, PHP, ASP.net and others
 * 500+ lines of **unit tests** ([tests.html](http://filedropjs.org/demo/tests.html))
 
+### Contributing 
+
+### Building
+```
+npm install
+npm run dist
+```
+
 ## Basic example
 
 [Live demo](http://filedropjs.org/demo/basic.html) →
