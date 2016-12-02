@@ -1114,6 +1114,7 @@
           })
 
           global.callAllOfObject(self, 'iframeDone', resp)
+          self.resetForm()
         }
 
         // Setting the hidden input with the callback name to our newly generated name.
@@ -1136,7 +1137,6 @@
         form.setAttribute('action', url)
         global.callAllOfObject(self, 'iframeSetup', form)
         form.submit()
-        setTimeout(self.resetForm, 300)
 
         return true
       }
