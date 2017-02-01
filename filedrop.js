@@ -2026,8 +2026,8 @@
 
       self.xhr.open(opt.method, opt.url, true)
       // Missing in IE.
-      self.xhr.overrideMimeType && self.xhr.overrideMimeType('application/octet-stream')
-      self.xhr.setRequestHeader('Content-Type', 'application/octet-stream')
+      self.xhr.overrideMimeType && self.xhr.overrideMimeType(self.type)
+      self.xhr.setRequestHeader('Content-Type', self.type)
 
       if (opt.extraHeaders) {
         self.xhr.setRequestHeader('X-File-Name', encodeURIComponent(self.name))
