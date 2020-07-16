@@ -707,7 +707,7 @@
       fullDocDragDetect: false,
 
       // Initial state of the multiple selection in browser's Open File dialog
-      // appearing when clickin on the drop zone (<input type="file">).
+      // appearing when clicking on the drop zone (<input type="file">).
       // After this object was created toggle this setting with this.multiple().
       multiple: false,
 
@@ -1858,8 +1858,11 @@
     // instance. See W3C spec: http://www.w3.org/TR/file-system-api/#the-entry-interface
     self.nativeEntry = null
 
-    // Local file name.
-    self.name = file.fileName || file.name || ''
+    // Local file name, possibly relative.
+    // webkitRelativePath present in <input type="file" webkitdirectory />:
+    // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
+    // https://developer.mozilla.org/en-US/docs/Web/API/File/webkitRelativePath
+    self.name = file.webkitRelativePath || file.fileName || file.name || ''
 
     // Local file size (bytes).
     self.size = file.fileSize || file.size || 0
