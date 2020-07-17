@@ -894,6 +894,32 @@
             global.callAllOfObject(self, 'dragLeave', e)
           }
         })
+      } else if (self.opt.elmDragDetect) {
+        // Not the best way but this allow you adding a biggest area for launching dragging.
+        var el2 = global.byID(self.opt.elmDragDetect);
+        var lastenter;
+        
+        global.addEvent(el2, 'dragenter', function (e) { 
+          if(e.target)     
+            lastenter = e.target;
+          else
+            lastenter = e.srcElement;
+            
+          global.callAllOfObject(self, 'dragEnter', e)
+          return false;
+        })
+        global.addEvent(el2, 'dragleave', function (e) { 
+            
+          if(!e.target)     
+            e.target = e.srcElement;
+          
+                 
+          if (lastenter === e.target ) {
+            if(self.opt.input.file !==  e.target)
+              global.callAllOfObject(self, 'dragLeave', e)
+            return false;
+          }
+        }) 
       } else {
         self.delegate(zoneNode, 'dragEnter')
         self.delegate(zoneNode, 'dragLeave')
