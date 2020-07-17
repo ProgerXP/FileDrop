@@ -18,6 +18,14 @@
 * Ready for **jQuery**, PHP, ASP.net and others
 * 500+ lines of **unit tests** ([tests.html](http://filedropjs.org/demo/tests.html))
 
+### Contributing 
+
+### Building
+```
+npm install
+npm run dist
+```
+
 ## Basic example
 
 [Live demo](http://filedropjs.org/demo/basic.html) →
@@ -128,28 +136,4 @@
 
 ## jQuery integration
 
- FileDrop can be integrated with jQuery by simply calling the following method (once, after loading both FileDrop and jQuery): `fd.jQuery()`.
-
-Drop zone events are prefixed with **fd** while individual file events start with **file**. DOM node events are triggered before those assigned to `obj.on.XXX` arrays and if a node handler returns non-null value on’s events are skipped.
-
-Note that jQuery will prepend its own event object in front of FileDrop’s normal event arguments since they’re triggered as regular events of a DOM node. See extensive comments in the sources for more details and examples.
-
-More information in the [documentation](http://filedropjs.org/#jquery) →
-
-```JS
-fd.jQuery();  // you can also pass an object like 'jQuery'.
-
-// Henceforth it's possible to access FileDrop as $().filedrop().
-$('<div><p>Drop something here...</p></div>')
-  .appendTo(document.body)
-  .filedrop()
-  // jQuery always passes event object as the first argument.
-  .on('fdsend', function (e, files) {
-    $.each(files, function (i, file) {
-      file.SendTo('upload.php');
-    });
-  })
-  .on('filedone', function (e, file) {
-    alert('Done uploading ' + file.name + ' on ' + this.tagName);
-  });
-```
+Really needed?
