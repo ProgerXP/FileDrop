@@ -863,7 +863,7 @@
       // for the support of uploads without File API, i.e. via <iframe> for
       // all but Firefox and Chrome. If such we're not creating the form and
       // other supportive elements.
-      if (self.opt.input != false) {
+      if (self.opt.input !== false) {
         self.opt.input = self.opt.input || self.prepareInput(zoneNode)
         self.opt.input && global.callAllOfObject(self, 'inputSetup', self.opt.input)
       }
@@ -1761,6 +1761,7 @@
       self.each(function (f) {
         if (value == null || value < (res = func.call(cx, file))) {
           file = f
+          value = res
         }
       }, cx)
 
